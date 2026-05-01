@@ -108,4 +108,40 @@ public class CentroidTesting {
         assertEquals(24, groups.get(2).centroid().x());
         assertEquals(24, groups.get(2).centroid().y());
     }
+
+
+    @Test
+    public void testSameColorDistanceZero() {
+        EuclideanColorDistance calculator = new EuclideanColorDistance();
+        assertEquals(0.0, calculator.distance(0xFFFFFF, 0xFFFFFF), 0.0001);
+    }
+
+    @Test
+    public void testBlackToWhiteDistance() {
+        EuclideanColorDistance calculator = new EuclideanColorDistance();
+        double expected = Math.sqrt((255 * 255) + (255 * 255) + (255 * 255));
+        assertEquals(expected, calculator.distance(0x000000, 0xFFFFFF), 0.0001);
+    }
+
+    @Test
+    public void testRedToGreenDistance() {
+        EuclideanColorDistance calculator = new EuclideanColorDistance();
+        double expected = Math.sqrt((255 * 255) + (255 * 255));
+        assertEquals(expected, calculator.distance(0xFF0000, 0x00FF00), 0.0001);
+    }
+
+    @Test
+    public void testBlueToYellowDistance() {
+        EuclideanColorDistance calculator = new EuclideanColorDistance();
+        double expected = Math.sqrt((255 * 255) + (255 * 255) + (255 * 255));
+        assertEquals(expected, calculator.distance(0x0000FF, 0xFFFF00), 0.0001);
+    }
+
+    @Test
+    public void testSymmetry() {
+        EuclideanColorDistance calculator = new EuclideanColorDistance();
+        double forward = calculator.distance(0x123456, 0x654321);
+        double backward = calculator.distance(0x654321, 0x123456);
+        assertEquals(forward, backward, 0.0001);
+    }
 }
