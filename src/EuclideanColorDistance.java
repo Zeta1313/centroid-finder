@@ -19,6 +19,22 @@ public class EuclideanColorDistance implements ColorDistanceFinder {
      */
     @Override
     public double distance(int colorA, int colorB) {
-        return 0;
+        int r1 = findHex(colorA, 0);
+        int r2 = findHex(colorB, 0);
+        int g1 = findHex(colorA, 4);
+        int g2 = findHex(colorB, 4);
+        int b1 = findHex(colorA, 8);
+        int b2 = findHex(colorB, 8);
+
+        return Math.sqrt((r1-r2)*(r1-r2)+(g1-g2)*(g1-g2)+(b1-b2)*(b1-b2));
+    }
+
+    private int findHex(int color, int start) {
+        int output = 0;
+        for (int i = 1; i < 5; i++) {
+            String temp = String.valueOf(color);
+            output = output*10 + (temp.charAt(start+i));
+        }
+        return output;
     }
 }
