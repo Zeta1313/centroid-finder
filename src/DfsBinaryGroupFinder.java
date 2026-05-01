@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public class DfsBinaryGroupFinder implements BinaryGroupFinder {
@@ -30,7 +31,64 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
     */
     @Override
     public List<Group> findConnectedGroups(int[][] image) {
-        return null;
+        // image variable is a 2d array that has a bunch of 1's and 0's
+        // if image is null, throw NullPointerException
+        // if array is invalid, throw IllegalArgumentException.
+
+        // the group datatype contains int size, coordinates centroid.
+            // the coordinates datatype contains int x, int y.
+        //int size: should contain all the number of pixels in the current iteration cell
+        //coordinates centroid: should contain basically the center coordinates of the current iteration cell
+        List<Group> result = new ArrayList<>();
+        if (image == null) {
+            throw new NullPointerException();
+        }
+        int[][] directions = {{-1,0},{1,0},{0,-1},{0,1}};
+        for (int r = 0; r < image.length; r++) {
+            for (int c = 0; c < image[0].length; c++) {
+                if (image[r][c] == 1) {
+                    // List<Group> current = findConnectedGroups(image, r, c, directions);
+                    // result.addAll()
+                }
+            }
+        }
+
+        return result;
+    }
+    // int size: a counter for size
+    // int sumx: a sum of all the x coordinate
+    // int sumy: a sum of all the y coordinate
+    class GroupStats {
+        int size;
+        int sumX;
+        int sumY;
+        GroupStats(int size, int sumX, int sumY) {
+            this.size = size;
+            this.sumX = sumX;
+            this.sumY = sumY;
+        }
+    }
+
+    public GroupStats findConnectedGroups(int[][] image, int r, int c, int[][] moves) {
+        if (r < 0 || r >= image.length ||
+            c < 0 || c >= image[0].length ||
+            image[r][c] == 0) {
+                return new GroupStats(0, 0, 0);
+        }
+        GroupStats result = new GroupStats(1, c, r);
+        image[r][c] = 0;
+
+        for (int[] move : moves) {
+            int curR = move[0] + r;
+            int curC = move[1] + c;
+
+            GroupStats current = findConnectedGroups(image, curR, curC, moves);
+            result.size += current.size;
+            result.sumX += current.sumX;
+            result.sumY += current.sumY;
+            
+        }
+        return result;
     }
     
 }
