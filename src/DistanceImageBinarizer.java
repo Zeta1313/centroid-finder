@@ -75,16 +75,32 @@ public class DistanceImageBinarizer implements ImageBinarizer {
     @Override
     public int[][] toBinaryArray(BufferedImage image) {
         //loop over row and col using a nested for loop via getHeight() and getWidth()
+            // grab the color of each current pixel,
+            // call distanceFinder.distance that takes two colors, returning distance, use params:
+                // - targetColor
+                // - current pixel getRGB
+            // compare results of distanceFinder.distance with threshold
+            // if current distance is less thanthreshold, set result[y][x] to white (1)
+            // else, set result[y][x] to black (0)
+
         int width = image.getWidth();
         int height = image.getHeight();
+
+        int[][] result = new int[height][width];
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int currentPixelColor = image.getRGB(x, y);
+                double distance = distanceFinder.distance(currentPixelColor, targetColor);
+                if (distance < threshold) {
+                    result[y][x] = 1;
+                } else {
+                    result[y][x] = 0;
+                }
                 // to be continued...
             }
         }
-        return null;
+        return result;
     }
 
     /**
