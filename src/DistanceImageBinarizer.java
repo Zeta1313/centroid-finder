@@ -37,26 +37,32 @@ public class DistanceImageBinarizer implements ImageBinarizer {
     /*
     NOTES:
     java.awt.image.BufferedImage is a class that contains and provides getRGB and setRGB
-    int getRGB(int x, int y) : getRGB returns the pixel colors at coordinates (x,y) as an integer.
-    void setRGB(int x, int y, int rgb) : Sets the pixel at (x, y) to the specified ARGB integer value.
-
-    
+    more on: https://docs.oracle.com/javame/config/cdc/opt-pkgs/api/agui/jsr209/java/awt/image/BufferedImage.html
+        int getRGB(int x, int y) : getRGB returns the pixel colors at coordinates (x,y) as an integer.
+        void setRGB(int x, int y, int rgb) : Sets the pixel at (x, y) to the specified ARGB integer value.
+        int getHeight() : returns the height of the bufferedImage
+        int getWidth() : returns the width of the bufferedImage
 
     there are two methods:
         one is to convert bufferedImage into binary array
         the other is to convert binary array into bufferedImage
-    
+    so first method converts colorful image into 2d array of 1's and 0's, then second method converts the 2d array into black and white image.
+
     - toBinaryArray would require getRGB (which returns an int), we take the int of each pixel and convert it into 1 or 0 in the array.
     - toBufferedImage would require setRGB (a void that sets pixel location (x,y) to a color),
         based on the param of 2d array of 1's and 0's, we create a new BufferedImage and set each pixel location corresponding with
         image array row and col to the either black or white.
+    
+    distanceFinder: is passed using EuclideanColorDistance, so we can call the method in there.
+    targerColor: is another 24-bit hex RGB integer, i believe we call distanceFinder.distance(
+        targetColor,
+        getRGB from bufferedImage image in the first method
+    )
+    threshold: distanceFinder.distance will return an int, we compare int threshold with the return result.
 
     When creating a new image, you can use the below to start the instance:
         new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
-    summary: first method converts colorful image into 2d array of 1's and 0's, then second method converts the 2d array into black and white image.
-
-    */
 
     /**
      * Converts the given BufferedImage into a binary 2D array using color distance and a threshold.
@@ -68,6 +74,16 @@ public class DistanceImageBinarizer implements ImageBinarizer {
      */
     @Override
     public int[][] toBinaryArray(BufferedImage image) {
+        //loop over row and col using a nested for loop via getHeight() and getWidth()
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int currentPixelColor = image.getRGB(x, y);
+                // to be continued...
+            }
+        }
         return null;
     }
 
