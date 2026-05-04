@@ -44,6 +44,11 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
         if (image == null) {
             throw new NullPointerException();
         }
+        for (int[] row : image) {
+            if (row == null || row.length != image[0].length) {
+                throw new IllegalArgumentException("Array must be rectangular and non-null.");
+            }
+        }
         int[][] directions = {{-1,0},{1,0},{0,-1},{0,1}};
         for (int r = 0; r < image.length; r++) {
             for (int c = 0; c < image[0].length; c++) {
