@@ -1,6 +1,7 @@
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import java.util.List;
+import java.awt.image.BufferedImage;
 
 public class CentroidTesting {
 
@@ -143,5 +144,115 @@ public class CentroidTesting {
         double forward = calculator.distance(0x123456, 0x654321);
         double backward = calculator.distance(0x654321, 0x123456);
         assertEquals(forward, backward, 0.0001);
+    }
+    @Test
+    void testToBinaryArray_allWithinThreshold() {
+        BufferedImage image = new BufferedImage(2, 2, BufferedImage.TYPE_INT_RGB);
+        image.setRGB(0, 0, 10);
+        image.setRGB(1, 0, 12);
+        image.setRGB(0, 1, 9);
+        image.setRGB(1, 1, 11);
+
+        DistanceImageBinarizer binarizer =
+                new DistanceImageBinarizer(new EuclideanColorDistance(), 10, 5);
+
+        int[][] result = binarizer.toBinaryArray(image);
+
+        assertArrayEquals(new int[][]{
+                {1, 1},
+                {1, 1}
+        }, result);
+    }
+
+    @Test
+    void testToBinaryArray_allOutsideThreshold() {
+        BufferedImage image = new BufferedImage(2, 2, BufferedImage.TYPE_INT_RGB);
+        image.setRGB(0, 0, 100);
+        image.setRGB(1, 0, 120);
+        image.setRGB(0, 1, 90);
+        image.setRGB(1, 1, 110);
+
+        DistanceImageBinarizer binarizer =
+                new DistanceImageBinarizer(new EuclideanColorDistance(), 10, 5);
+
+        int[][] result = binarizer.toBinaryArray(image);
+
+        assertArrayEquals(new int[][]{
+                {0, 0},
+                {0, 0}
+        }, result);
+    }
+
+    @Test
+    void testToBinaryArray_mixedValues() {
+        BufferedImage image = new BufferedImage(2, 2, BufferedImage.TYPE_INT_RGB);
+        image.setRGB(0, 0, 10);
+        image.setRGB(1, 0, 20);
+        image.setRGB(0, 1, 8);
+        image.setRGB(1, 1, 30);
+
+        DistanceImageBinarizer binarizer =
+                new DistanceImageBinarizer(new EuclideanColorDistance(), 10, 5);
+
+        int[][] result = binarizer.toBinaryArray(image);
+
+        assertArrayEquals(new int[][]{
+                {1, 0},
+                {1, 0}
+        }, result);
+    }
+
+    @Test
+    void testToBufferedImage_allWhite() {
+        int[][] input = {
+                {1, 1},
+                {1, 1}
+        };
+
+        DistanceImageBinarizer binarizer =
+                new DistanceImageBinarizer(new EuclideanColorDistance(), 0, 0);
+
+        BufferedImage result = binarizer.toBufferedImage(input);
+
+        assertEquals(0xFFFFFF, result.getRGB(0, 0) & 0xFFFFFF);
+        assertEquals(0xFFFFFF, result.getRGB(1, 0) & 0xFFFFFF);
+        assertEquals(0xFFFFFF, result.getRGB(0, 1) & 0xFFFFFF);
+        assertEquals(0xFFFFFF, result.getRGB(1, 1) & 0xFFFFFF);
+    }
+
+    @Test
+    void testToBufferedImage_allBlack() {
+        int[][] input = {
+                {0, 0},
+                {0, 0}
+        };
+
+        DistanceImageBinarizer binarizer =
+                new DistanceImageBinarizer(new EuclideanColorDistance(), 0, 0);
+
+        BufferedImage result = binarizer.toBufferedImage(input);
+
+        assertEquals(0x000000, result.getRGB(0, 0) & 0xFFFFFF);
+        assertEquals(0x000000, result.getRGB(1, 0) & 0xFFFFFF);
+        assertEquals(0x000000, result.getRGB(0, 1) & 0xFFFFFF);
+        assertEquals(0x000000, result.getRGB(1, 1) & 0xFFFFFF);
+    }
+
+    @Test
+    void testToBufferedImage_mixedValues() {
+        int[][] input = {
+                {1, 0},
+                {0, 1}
+        };
+
+        DistanceImageBinarizer binarizer =
+                new DistanceImageBinarizer(new EuclideanColorDistance(), 0, 0);
+
+        BufferedImage result = binarizer.toBufferedImage(input);
+
+        assertEquals(0xFFFFFF, result.getRGB(0, 0) & 0xFFFFFF);
+        assertEquals(0x000000, result.getRGB(1, 0) & 0xFFFFFF);
+        assertEquals(0x000000, result.getRGB(0, 1) & 0xFFFFFF);
+        assertEquals(0xFFFFFF, result.getRGB(1, 1) & 0xFFFFFF);
     }
 }
