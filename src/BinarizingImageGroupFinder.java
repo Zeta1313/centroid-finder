@@ -1,5 +1,6 @@
 import java.awt.image.BufferedImage;
 import java.util.List;
+import java.util.Collections;
 
 /**
  * An implementation of the ImageGroupFinder interface that first binarizes a given image and then finds
@@ -37,6 +38,8 @@ public class BinarizingImageGroupFinder implements ImageGroupFinder {
      */
     @Override
     public List<Group> findConnectedGroups(BufferedImage image) {
-        return null;
+        int[][] array = binarizer.toBinaryArray(image);
+        List<Group> list = groupFinder.findConnectedGroups(array);
+        return list;
     }
 }
