@@ -19,3 +19,6 @@ Important files:
 ## DistanceImageBinarizer
 - first method takes in BurredImage type variable and converts into a 2d array that we return.
     - each entry is the returned array is either 0 or 1, representing a black or white pizel.
+
+
+# hi
