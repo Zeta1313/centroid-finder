@@ -22,3 +22,5 @@ Important files:
 
 
 # hi
+- javac -cp "lib/*;target" -d target src/*.java
+- find src -name "*.class" -delete && echo "Cleaned .class files" || echo "No .class files found or error"
