@@ -1,3 +1,5 @@
+package io.github.zeta1313.centroidfinder;
+
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.Collections;

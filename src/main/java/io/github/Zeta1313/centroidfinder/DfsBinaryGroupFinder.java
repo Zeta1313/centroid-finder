@@ -1,3 +1,5 @@
+package io.github.zeta1313.centroidfinder;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

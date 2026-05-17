@@ -1,3 +1,5 @@
+package io.github.zeta1313.centroidfinder;
+
 /**
  * Represents a location in an image or array
  * 

@@ -50,7 +50,7 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.1.0</version>
         <configuration>
-          <mainClass>io.github.Zeta1313.centroid-finder.App</mainClass>
+          <mainClass>io.github.zeta1313.centroidfinder.ImageSummaryApp</mainClass>
         </configuration>
       </plugin>
     </plugins>
