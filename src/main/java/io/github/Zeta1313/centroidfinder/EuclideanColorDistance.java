@@ -1,4 +1,4 @@
-package io.github.zeta1313.centroidfinder;
+package io.github.Zeta1313.centroidfinder;
 
 public class EuclideanColorDistance implements ColorDistanceFinder {
     /**
