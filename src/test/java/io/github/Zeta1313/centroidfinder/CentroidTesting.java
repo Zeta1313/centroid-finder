@@ -1,4 +1,4 @@
-package io.github.Zeta1313.centroidFinder;
+package io.github.Zeta1313.centroidfinder;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
