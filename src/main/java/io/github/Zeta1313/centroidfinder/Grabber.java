@@ -13,7 +13,6 @@ public class Grabber {
     private FrameGrab grab;
 
     public Grabber(String path) throws Exception {
-
         grab = FrameGrab.createFrameGrab(
                 NIOUtils.readableChannel(new File(path))
         );
