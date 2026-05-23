@@ -1,7 +1,9 @@
 package io.github.Zeta1313.centroidfinder;
 
 import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 
 public class DfsBinaryGroupFinder implements BinaryGroupFinder {
@@ -84,20 +86,33 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
             image[r][c] == 0) {
                 return new int[]{0,0,0};
         }
-        int[] result = new int[]{1, c, r};
+
+        int[] result = new int[]{0, 0, 0};
+        Deque<int[]> stack = new ArrayDeque<>();
         image[r][c] = 0;
+        stack.push(new int[]{r, c});
 
-        for (int[] move : moves) {
-            int curR = move[0] + r;
-            int curC = move[1] + c;
+        while (!stack.isEmpty()) {
+            int[] pos = stack.pop();
+            int curR = pos[0]6;
+            int curC = pos[1];
 
-            int[] current = dfs(image, curR, curC, moves);
+            result[0]++;
+            result[1] += curC;
+            result[2] += curR;
 
-            result[0] += current[0];
-            result[1] += current[1];
-            result[2] += current[2];
-            
+            for (int[] move : moves) {
+                int newR = curR + move[0];
+                int newC = curC + move[1];
+                if (newR >= 0 && newR < image.length
+                        && newC >= 0 && newC < image[0].length
+                        && image[newR][newC] == 1) {
+                    image[newR][newC] = 0;
+                    stack.push(new int[]{newR, newC});
+                }
+            }
         }
+
         return result;
     }
     

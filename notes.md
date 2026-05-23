@@ -25,4 +25,5 @@ Important files:
 - javac -cp "lib/*;target" -d target src/*.java
 - find src -name "*.class" -delete && echo "Cleaned .class files" || echo "No .class files found or error"
 
-- java -jar target/videoprocessor.jar video.mp4 output.csv FFA200 164
+- mvn clean package -DskipTests
+java -jar target/videoprocessor.jar video.mp4 output.csv FFA200 164
