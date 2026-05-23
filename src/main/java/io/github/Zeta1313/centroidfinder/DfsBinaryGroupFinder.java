@@ -94,7 +94,7 @@ public class DfsBinaryGroupFinder implements BinaryGroupFinder {
 
         while (!stack.isEmpty()) {
             int[] pos = stack.pop();
-            int curR = pos[0]6;
+            int curR = pos[0];
             int curC = pos[1];
 
             result[0]++;

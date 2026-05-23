@@ -49,6 +49,8 @@ public class VideoSummaryApp {
         // while (null != (picture = grab.getNativeFrame())) {
         //     System.out.println(picture.getWidth() + "x" + picture.getHeight() + " " + picture.getColor());
         // }
+
+        //This works by taking the color BufferedImage and binarizing it, and turning it back into BufferedImage but black and white
         //THIS IS A WORKING TEST, rebuild your maven, then run "java -jar target/videoprocessor.jar video.mp4 output.csv FFA200 164"
         try (var channel = NIOUtils.readableChannel(new File(inputPath));
             PrintWriter writer = new PrintWriter(outputCSVPath)) {
@@ -59,14 +61,20 @@ public class VideoSummaryApp {
             Picture picture;
             while ((picture = grab.getNativeFrame()) != null) {
                 BufferedImage frame = AWTUtil.toBufferedImage(picture);
-
-                // quick console check
                 System.out.println("Read frame " + frameIndex + " size=" + frame.getWidth() + "x" + frame.getHeight());
+
+                // Create the DistanceImageBinarizer with a EuclideanColorDistance instance.
+                ColorDistanceFinder distanceFinder = new EuclideanColorDistance();
+                ImageBinarizer binarizer = new DistanceImageBinarizer(distanceFinder, targetColor, threshold);
+                
+                // Binarize the input image.
+                int[][] binaryArray = binarizer.toBinaryArray(frame);
+                BufferedImage binaryImage = binarizer.toBufferedImage(binaryArray);
 
                 // save first 5 frames as PNG to inspect visually
                 if (frameIndex < 5) {
                     try {
-                        ImageIO.write(frame, "png", new File(String.format("debug-frame-%04d.png", frameIndex)));
+                        ImageIO.write(binaryImage, "png", new File(String.format("debug-frame-%04d.png", frameIndex)));
                     } catch (IOException ioe) {
                         ioe.printStackTrace();
                     }
@@ -75,6 +83,7 @@ public class VideoSummaryApp {
                 // your processing
                 List<Group> groups = groupFinder.findConnectedGroups(frame);
                 frameIndex++;
+
             }
 
         } catch (Exception e) {
