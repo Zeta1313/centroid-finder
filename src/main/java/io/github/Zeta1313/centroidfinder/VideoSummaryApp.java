@@ -31,11 +31,12 @@ public class VideoSummaryApp {
             System.err.println("Invalid hex target color. Please provide a color in RRGGBB format.");
             return;
         }
+        
             
     }
-    catch (Exception e) {
+        catch (Exception e) {
             e.printStackTrace();
-    }
+        }
     }
 
     public Group findLargestGroup(List<Group> groups) {
