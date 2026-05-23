@@ -8,7 +8,7 @@ import org.jcodec.common.io.NIOUtils;
 import org.jcodec.common.model.Picture;
 import org.jcodec.scale.AWTUtil;
 
-public class Grabber {
+public class Grabber implements AutoCloseable{
 
     private FrameGrab grab;
 
@@ -25,4 +25,7 @@ public class Grabber {
         }
         return AWTUtil.toBufferedImage(picture);
     }
+
+    @Override
+    public void close() throws Exception {}
 }

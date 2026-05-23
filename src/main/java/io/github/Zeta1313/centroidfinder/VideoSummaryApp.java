@@ -1,16 +1,7 @@
 package io.github.Zeta1313.centroidfinder;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
-import javax.imageio.ImageIO;
-
-import org.jcodec.api.FrameGrab;
-import org.jcodec.common.io.NIOUtils;
-import org.jcodec.common.model.Picture;
-import org.jcodec.scale.AWTUtil;
 
 public class VideoSummaryApp {
     public static void main(String[] args) {
@@ -52,59 +43,32 @@ public class VideoSummaryApp {
 
         //This works by taking the color BufferedImage and binarizing it, and turning it back into BufferedImage but black and white
         //THIS IS A WORKING TEST, rebuild your maven, then run "java -jar target/videoprocessor.jar video.mp4 output.csv FFA200 164"
-        try (var channel = NIOUtils.readableChannel(new File(inputPath));
-            PrintWriter writer = new PrintWriter(outputCSVPath)) {
-
-            FrameGrab grab = FrameGrab.createFrameGrab(channel);
-            // ... process frames ...
+            Grabber grabber = new Grabber(inputPath);
+            CSVExport exporter = new CSVExport(outputCSVPath);
+            Salamander salamander = null;
+            BufferedImage frame;
             int frameIndex = 0;
-            Picture picture;
-            while ((picture = grab.getNativeFrame()) != null) {
-                BufferedImage frame = AWTUtil.toBufferedImage(picture);
-                System.out.println("Read frame " + frameIndex + " size=" + frame.getWidth() + "x" + frame.getHeight());
-
-                // Create the DistanceImageBinarizer with a EuclideanColorDistance instance.
-                ColorDistanceFinder distanceFinder = new EuclideanColorDistance();
-                ImageBinarizer binarizer = new DistanceImageBinarizer(distanceFinder, targetColor, threshold);
-                
-                // Binarize the input image.
-                int[][] binaryArray = binarizer.toBinaryArray(frame);
-                BufferedImage binaryImage = binarizer.toBufferedImage(binaryArray);
-
-                // save first 5 frames as PNG to inspect visually
-                if (frameIndex < 5) {
-                    try {
-                        ImageIO.write(binaryImage, "png", new File(String.format("debug-frame-%04d.png", frameIndex)));
-                    } catch (IOException ioe) {
-                        ioe.printStackTrace();
-                    }
-                }
-
-                // your processing
+            while ((frame = grabber.nextFrame()) != null) {
                 List<Group> groups = groupFinder.findConnectedGroups(frame);
+                if (groups.isEmpty()) {
+                    frameIndex++;
+                    continue;
+                }
+                if (salamander == null) {
+                    salamander = new Salamander(GroupManager.findLargestGroup(groups));
+                } 
+                else {
+                    Group closest = GroupManager.findClosestGroup(salamander.getSalamander(), groups);
+                    salamander.update(closest);
+                }
+                exporter.writeFrame(frameIndex, salamander.getSalamander());
                 frameIndex++;
-
             }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
-            
-    }
+            exporter.close();
+            grabber.close();
+        }     
         catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public Group findLargestGroup(List<Group> groups) {
-        Group largest = groups.get(0);
-        for (Group group : groups) {
-
-            if (group.size() > largest.size()) {
-                largest = group;
-            }
-        }
-        return largest;
     }
 }
