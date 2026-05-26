@@ -49,6 +49,7 @@ public class VideoSummaryApp {
             BufferedImage frame;
             int frameIndex = 0;
             while ((frame = grabber.nextFrame()) != null) {
+                System.out.println("current frame:" + frameIndex);
                 List<Group> groups = groupFinder.findConnectedGroups(frame);
                 if (groups.isEmpty()) {
                     frameIndex++;
@@ -66,8 +67,8 @@ public class VideoSummaryApp {
             }
             exporter.close();
             grabber.close();
-        }     
-        catch (Exception e) {
+            
+        }   catch (Exception e) {
             e.printStackTrace();
         }
     }
