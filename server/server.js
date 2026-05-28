@@ -78,9 +78,68 @@ app.get("/api/thumbnail/:filename", async (req, res) => {
     }
 });
 
-app.post("/process/{filename}", async (req, res) => {
+app.post("/process/:filename", async (req, res) => {
+    try {
+        const videosPath = process.env.VIDEOS_PATH
 
-});
+        if (!videosPath) {
+            throw new Error("VIDEOS_PATH missing")
+        }
+
+        const filename = path.basename(req.params.filename)
+
+        const targetColor = req.query.targetColor
+        const threshold = req.query.threshold
+        const parsedThreshold = Number.parseInt(threshold)
+        const inputPath = path.join(videosPath, filename)
+        await fs.access(inputPath)
+
+        const jobId = crypto.randomUUID()
+
+        const outputPath = path.join(
+            process.env.OUTPUT_PATH || "./output",
+            `${jobId}.csv`
+        )
+
+        jobs[jobId] = {
+            status: "running",
+            filename,
+            outputPath
+        }
+        const javaProcess = spawn("java", [
+            "-jar",
+            "target/videoprocessor.jar",
+            inputPath,
+            outputPath,
+            targetColor,
+            parsedThreshold.toString()
+        ])
+
+        javaProcess.on("close", code => {
+            if (code === 0) {
+                jobs[jobId].status = "complete"
+            }
+            else {
+                jobs[jobId].status = "failed"
+            }
+        })
+
+        javaProcess.on("error", () => {
+            jobs[jobId].status = "failed"
+        })
+
+        res.json({
+            jobId
+        })
+    }
+    catch (error) {
+        console.error(error)
+
+        res.status(500).json({
+            error: "Error starting job"
+        })
+    }
+})
 
 app.get("/process/{jobId}/status", async (req, res) => {
 
