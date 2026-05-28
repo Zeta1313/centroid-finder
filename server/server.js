@@ -1,5 +1,9 @@
 import express from "express"
 import dotenv from "dotenv"
+import ffmpeg from "fluent-ffmpeg"
+import fs from "fs/promises"
+import path from "path"
+import os from "os"
 
 dotenv.config()
 
@@ -32,8 +36,46 @@ app.get("/api/videos", async (req, res) => {
     }
 })
 
-app.get("/thumbnail/{filename}", async (req, res) => {
+app.get("/api/thumbnail/:filename", async (req, res) => {
+    try {
+        const videosPath = process.env.VIDEOS_PATH
 
+        if (!videosPath) {
+            throw new Error("Error generating thumbnail")
+        }
+
+        const filename = req.params.filename
+
+        const videoPath = path.join(videosPath, filename)
+
+        await fs.access(videoPath)
+
+        const thumbnailPath = path.join(
+            os.tmpdir(),
+            `${Date.now()}-${path.parse(filename).name}.png`
+        )
+
+        await new Promise((resolve, reject) => {
+            ffmpeg(videoPath)
+                .screenshots({
+                    timestamps: ["0"],
+                    filename: path.basename(thumbnailPath),
+                    folder: path.dirname(thumbnailPath),
+                    size: "320x180"
+                })
+                .on("end", resolve)
+                .on("error", reject)
+        })
+
+        res.sendFile(thumbnailPath)
+    }
+    catch (error) {
+        console.error(error)
+
+        res.status(500).json({
+            error: "Error generating thumbnail"
+        })
+    }
 });
 
 app.post("/process/{filename}", async (req, res) => {
