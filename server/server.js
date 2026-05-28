@@ -1,6 +1,7 @@
 import express from "express"
 import dotenv from "dotenv"
 import ffmpeg from "fluent-ffmpeg"
+import ffmpegPath from "ffmpeg-static"
 import fs from "fs/promises"
 import path from "path"
 import os from "os"
@@ -18,6 +19,8 @@ const videosPath = path.resolve(process.env.VIDEOS_PATH)
 const app = express()
 
 const PORT = process.env.PORT;
+
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 app.use(express.json());
 
@@ -197,6 +200,8 @@ app.get("/job/:jobId", (req, res) => {
 //http://localhost:3000/api/videos
 //http://localhost:3000/api/thumbnail/video.mp4
 //http://localhost:3000/videos/video.mp4.
+// http://localhost:3000/process/video.mp4
+
 app.listen(PORT, () => {
     console.log(`Server started on http://localhost:${PORT}`);
 });
