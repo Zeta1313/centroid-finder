@@ -4,23 +4,29 @@ import ffmpeg from "fluent-ffmpeg"
 import fs from "fs/promises"
 import path from "path"
 import os from "os"
+import { fileURLToPath } from "url"
 
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
+// make sure the .env is in the server folder
 dotenv.config()
+
+const videosPath = path.resolve(process.env.VIDEOS_PATH)
 
 const app = express()
 
-application.use(express.json());
+const PORT = process.env.PORT;
 
-app.use("/videos", express.static(process.env.VIDEOS_PATH))
+app.use(express.json());
+
+app.use("/videos", express.static(videosPath))
 
 app.get("/api/videos", async (req, res) => {
     try {
         const allowedExtensions = [".mp4", ".mov", ".webm"]
-        const videosPath = process.env.VIDEOS_PATH
-
-        if (!videosPath) {throw new Error("Error reading video directory")}
-
-        const files = await fs.readdir(absolutePath)
+        const files = await fs.readdir(videosPath)
 
         const videoFiles = files.filter(file => {
             const extension = path.extname(file).toLowerCase()
@@ -38,12 +44,6 @@ app.get("/api/videos", async (req, res) => {
 
 app.get("/api/thumbnail/:filename", async (req, res) => {
     try {
-        const videosPath = process.env.VIDEOS_PATH
-
-        if (!videosPath) {
-            throw new Error("Error generating thumbnail")
-        }
-
         const filename = req.params.filename
 
         const videoPath = path.join(videosPath, filename)
@@ -85,7 +85,11 @@ app.post("/process/{filename}", async (req, res) => {
 app.get("/process/{jobId}/status", async (req, res) => {
 
 });
-
-app.listen(3000, () => {
-    console.log("Server running on port 3000")
+// cd into server folder
+// node server.js or npm run dev (make sure to install nodemon)
+//http://localhost:3000/api/videos
+//http://localhost:3000/api/thumbnail/video.mp4
+//http://localhost:3000/videos/video.mp4.
+app.listen(PORT, () => {
+    console.log(`Server started on http://localhost:${PORT}`);
 });
