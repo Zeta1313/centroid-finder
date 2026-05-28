@@ -7,13 +7,14 @@ const app = express()
 
 application.use(express.json());
 
+app.use("/videos", express.static(process.env.VIDEOS_PATH))
+
 app.get("/api/videos", async (req, res) => {
     try {
+        const allowedExtensions = [".mp4", ".mov", ".webm"]
         const videosPath = process.env.VIDEOS_PATH
 
         if (!videosPath) {throw new Error("Error reading video directory")}
-
-        const absolutePath = path.resolve(videosPath)
 
         const files = await fs.readdir(absolutePath)
 
