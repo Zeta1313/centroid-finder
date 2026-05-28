@@ -102,10 +102,11 @@ app.post("/process/:filename", async (req, res) => {
         )
 
         jobs[jobId] = {
-            status: "running",
-            filename,
-            outputPath
+            status: "processing",
+            result: null,
+            error: null
         }
+
         const javaProcess = spawn("java", [
             "-jar",
             "target/videoprocessor.jar",
@@ -117,15 +118,27 @@ app.post("/process/:filename", async (req, res) => {
 
         javaProcess.on("close", code => {
             if (code === 0) {
-                jobs[jobId].status = "complete"
+                jobs[jobId] = {
+                    status: "done",
+                    result: `/result/${outputFilename}`,
+                    error: null
+                }
             }
             else {
-                jobs[jobId].status = "failed"
+                jobs[jobId] = {
+                    status: "error",
+                    result: null,
+                    error: `Process exited with code ${code}`
+                }
             }
         })
 
-        javaProcess.on("error", () => {
-            jobs[jobId].status = "failed"
+        javaProcess.on("error", error => {
+            jobs[jobId] = {
+                status: "error",
+                result: null,
+                error: error.message
+            }
         })
 
         res.json({
@@ -141,9 +154,44 @@ app.post("/process/:filename", async (req, res) => {
     }
 })
 
-app.get("/process/{jobId}/status", async (req, res) => {
+app.get("/job/:jobId", (req, res) => {
+    try {
+        const job = jobs[req.params.jobId]
 
-});
+        if (!job) {
+            return res.status(404).json({
+                error: "Job ID not found"
+            })
+        }
+
+        if (job.status === "processing") {
+            return res.status(200).json({
+                status: "processing"
+            })
+        }
+
+        if (job.status === "done") {
+            return res.status(200).json({
+                status: "done",
+                result: job.result
+            })
+        }
+
+        if (job.status === "error") {
+            return res.status(200).json({
+                status: "error",
+                error: job.error
+            })
+        }
+    }
+    catch (error) {
+        console.error(error)
+
+        res.status(500).json({
+            error: "Error fetching job status"
+        })
+    }
+})
 
 app.listen(3000, () => {
     console.log("Server running on port 3000")
