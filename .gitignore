@@ -27,3 +27,5 @@ replay_pid*
 *.mp4
 
 node_modules
+
+.env
