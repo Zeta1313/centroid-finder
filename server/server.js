@@ -6,6 +6,7 @@ import fs from "fs/promises"
 import path from "path"
 import os from "os"
 import { fileURLToPath } from "url"
+import { spawn } from "child_process"
 
 
 const filename = fileURLToPath(import.meta.url)
@@ -15,10 +16,13 @@ const dirname = path.dirname(filename)
 dotenv.config()
 
 const videosPath = path.resolve(process.env.VIDEOS_PATH)
+// console.log(videosPath)
 
 const app = express()
 
 const PORT = process.env.PORT;
+
+const jobs = {}
 
 ffmpeg.setFfmpegPath(ffmpegPath);
 
@@ -80,75 +84,58 @@ app.get("/api/thumbnail/:filename", async (req, res) => {
         })
     }
 });
-
+// curl -X POST "http://localhost:3000/process/d?targetColor=FFA200&threshold=164"
+// curl -X POST "http://localhost:3000/process/video.mp4?targetColor=FFA200&threshold=164"
 app.post("/process/:filename", async (req, res) => {
     try {
-        const videosPath = process.env.VIDEOS_PATH
+        const filename = req.params.filename;
+        const targetColor = req.query.targetColor;
+        const threshold = req.query.threshold;
 
-        if (!videosPath) {
-            throw new Error("VIDEOS_PATH missing")
+        if (!targetColor || !threshold) {
+            return res.status(400).json({
+                error: "Missing targetColor or threshold query parameter."
+            });
         }
 
-        const filename = path.basename(req.params.filename)
+        const safeFilename = path.basename(req.params.filename);
+        const inputPath = path.join(videosPath, safeFilename);
 
-        const targetColor = req.query.targetColor
-        const threshold = req.query.threshold
-        const parsedThreshold = Number.parseInt(threshold)
-        const inputPath = path.join(videosPath, filename)
-        await fs.access(inputPath)
+        // console.log(safeFilename) // ex: print video.mp4
+        // console.log(inputPath)    // ex: ...centroid-finder/videos/video.mp4
 
-        const jobId = crypto.randomUUID()
+        const jobId = crypto.randomUUID();
+        //updates or adds the jobID and its statuses report, this is for the /job/:jobID
+        jobs[jobId] = { status: "processing", result: null, error: null };
 
         const outputPath = path.join(
-            process.env.OUTPUT_PATH || "./output",
+            path.resolve(process.env.OUTPUT_PATH),
             `${jobId}.csv`
-        )
-
-        jobs[jobId] = {
-            status: "processing",
-            result: null,
-            error: null
-        }
+        );
 
         const javaProcess = spawn("java", [
-            "-jar",
-            "target/videoprocessor.jar",
-            inputPath,
-            outputPath,
-            targetColor,
-            parsedThreshold.toString()
-        ])
+            "-jar", path.resolve(dirname, process.env.JAR_PATH),
+            inputPath, outputPath, targetColor, threshold
+        ], { detached: true, stdio: "ignore" });
 
-        javaProcess.on("close", code => {
-            if (code === 0) {
-                jobs[jobId] = {
-                    status: "done",
-                    result: `/result/${outputFilename}`,
-                    error: null
-                }
-            }
-            else {
-                jobs[jobId] = {
-                    status: "error",
-                    result: null,
-                    error: `Process exited with code ${code}`
-                }
-            }
-        })
+        javaProcess.on("close", (code) => {
+            jobs[jobId] = code === 0
+                ? { status: "done", result: `/results/${jobId}.csv`, error: null }
+                : { status: "error", result: null, error: `Process exited with code ${code}` };
+        });
 
-        javaProcess.on("error", error => {
-            jobs[jobId] = {
-                status: "error",
-                result: null,
-                error: error.message
-            }
-        })
+        javaProcess.on("error", (err) => {
+            jobs[jobId] = { status: "error", result: null, error: err.message };
+        });
 
-        res.json({
-            jobId
+        javaProcess.unref();
+
+        await fs.mkdir(path.resolve(process.env.OUTPUT_PATH), { recursive: true });
+        
+        res.status(202).json({
+            "jobId": jobId
         })
-    }
-    catch (error) {
+    } catch (error) {
         console.error(error)
 
         res.status(500).json({
@@ -156,6 +143,7 @@ app.post("/process/:filename", async (req, res) => {
         })
     }
 })
+
 
 app.get("/job/:jobId", (req, res) => {
     try {
@@ -200,8 +188,16 @@ app.get("/job/:jobId", (req, res) => {
 //http://localhost:3000/api/videos
 //http://localhost:3000/api/thumbnail/video.mp4
 //http://localhost:3000/videos/video.mp4.
-// http://localhost:3000/process/video.mp4
+//http://localhost:3000/process/video.mp4?targetColor=FFA200&threshold=164
+//http://localhost:3000/process/d?targetColor=FFA200&threshold=164
 
+//your env ex: 
+/*
+VIDEOS_PATH=../videos
+OUTPUT_PATH=../output
+PORT=3000
+JAR_PATH=../processor/target/videoprocessor.jar
+*/
 app.listen(PORT, () => {
     console.log(`Server started on http://localhost:${PORT}`);
 });
