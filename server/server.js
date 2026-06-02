@@ -49,7 +49,7 @@ app.get("/api/videos", async (req, res) => {
     }
 })
 
-app.get("/api/thumbnail/:filename", async (req, res) => {
+app.get("/thumbnail/:filename", async (req, res) => {
     try {
         const filename = req.params.filename
 
@@ -186,7 +186,7 @@ app.get("/job/:jobId", (req, res) => {
 // cd into server folder
 // node server.js or npm run dev (make sure to install nodemon)
 //http://localhost:3000/api/videos
-//http://localhost:3000/api/thumbnail/video.mp4
+//http://localhost:3000/thumbnail/video.mp4
 //http://localhost:3000/videos/video.mp4.
 //http://localhost:3000/process/video.mp4?targetColor=FFA200&threshold=164
 //http://localhost:3000/process/d?targetColor=FFA200&threshold=164
