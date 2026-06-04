@@ -1,53 +1,27 @@
-import express from "express"
 import dotenv from "dotenv"
-import ffmpeg from "fluent-ffmpeg"
-import ffmpegPath from "ffmpeg-static"
-import fs from "fs/promises"
-import path from "path"
-import os from "os"
-import { fileURLToPath } from "url"
-import { spawn } from "child_process"
+import app from './app.js'
 
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-// make sure the .env is in the server folder
-dotenv.config()
-
-const videosPath = path.resolve(process.env.VIDEOS_PATH)
-// console.log(videosPath)
-
-const app = express()
-
+dotenv.config();
 const PORT = process.env.PORT;
 
-const jobs = {}
+// app.get("/api/videos", async (req, res) => {
+//     try {
+//         const allowedExtensions = [".mp4", ".mov", ".webm"]
+//         const files = await fs.readdir(videosPath)
 
-ffmpeg.setFfmpegPath(ffmpegPath);
+//         const videoFiles = files.filter(file => {
+//             const extension = path.extname(file).toLowerCase()
+//             return allowedExtensions.includes(extension)
+//         })
 
-app.use(express.json());
-
-app.use("/videos", express.static(videosPath))
-
-app.get("/api/videos", async (req, res) => {
-    try {
-        const allowedExtensions = [".mp4", ".mov", ".webm"]
-        const files = await fs.readdir(videosPath)
-
-        const videoFiles = files.filter(file => {
-            const extension = path.extname(file).toLowerCase()
-            return allowedExtensions.includes(extension)
-        })
-
-        res.json(videoFiles)
-    }
-    catch {
-        res.status(500).json({
-            error: "Error reading video directory"
-        })
-    }
-})
+//         res.json(videoFiles)
+//     }
+//     catch {
+//         res.status(500).json({
+//             error: "Error reading video directory"
+//         })
+//     }
+// })
 
 app.get("/thumbnail/:filename", async (req, res) => {
     try {
