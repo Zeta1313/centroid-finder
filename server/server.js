@@ -144,7 +144,8 @@ app.post("/process/:filename", async (req, res) => {
     }
 })
 
-
+// http://localhost:3000/job/:jobs
+// http://localhost:3000/job/77601cbf-6449-46b4-8f51-3ab8bdbc1ea0
 app.get("/job/:jobId", (req, res) => {
     try {
         const job = jobs[req.params.jobId]
