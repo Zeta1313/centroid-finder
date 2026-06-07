@@ -1,9 +1,20 @@
-import fs from 'fs/promises'
-import path from 'path'
+import express from "express"
 import dotenv from "dotenv"
+import ffmpeg from "fluent-ffmpeg"
+import ffmpegPath from "ffmpeg-static"
+import fs from "fs/promises"
+import path from "path"
+import os from "os"
+import { fileURLToPath } from "url"
+import { spawn } from "child_process"
+import crypto from 'crypto'
 
 dotenv.config()
 const videosPath = path.resolve(process.env.VIDEOS_PATH)
+const jobs = {}
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export const getAllVideos = async (req, res) => {
     try {
@@ -23,3 +34,135 @@ export const getAllVideos = async (req, res) => {
         })
     }
 };
+
+export const getThumbnail = async (req, res) => {
+    try {
+        const filename = req.params.filename
+
+        const videoPath = path.join(videosPath, filename)
+
+        await fs.access(videoPath)
+
+        const thumbnailPath = path.join(
+            os.tmpdir(),
+            `${Date.now()}-${path.parse(filename).name}.png`
+        )
+
+        await new Promise((resolve, reject) => {
+            ffmpeg(videoPath)
+                .screenshots({
+                    timestamps: ["0"],
+                    filename: path.basename(thumbnailPath),
+                    folder: path.dirname(thumbnailPath),
+                    size: "320x180"
+                })
+                .on("end", resolve)
+                .on("error", reject)
+        })
+
+        res.sendFile(thumbnailPath)
+    }
+    catch (error) {
+        console.error(error)
+
+        res.status(500).json({
+            error: "Error generating thumbnail"
+        })
+    }
+}
+export const processFile = async (req, res) => {
+    try {
+        const filename = req.params.filename;
+        const targetColor = req.query.targetColor;
+        const threshold = req.query.threshold;
+
+        if (!targetColor || !threshold) {
+            return res.status(400).json({
+                error: "Missing targetColor or threshold query parameter."
+            });
+        }
+
+        const safeFilename = path.basename(req.params.filename);
+        const inputPath = path.join(videosPath, safeFilename);
+
+        // console.log(safeFilename) // ex: print video.mp4
+        // console.log(inputPath)    // ex: ...centroid-finder/videos/video.mp4
+
+        const jobId = crypto.randomUUID();
+        //updates or adds the jobID and its statuses report, this is for the /job/:jobID
+        jobs[jobId] = { status: "processing", result: null, error: null };
+
+        const outputPath = path.join(
+            path.resolve(process.env.OUTPUT_PATH),
+            `${jobId}.csv`
+        );
+
+        const javaProcess = spawn("java", [
+            "-jar", path.resolve(dirname, process.env.JAR_PATH),
+            inputPath, outputPath, targetColor, threshold
+        ], { detached: true, stdio: "ignore" });
+
+        javaProcess.on("close", (code) => {
+            jobs[jobId] = code === 0
+                ? { status: "done", result: `/results/${jobId}.csv`, error: null }
+                : { status: "error", result: null, error: `Process exited with code ${code}` };
+        });
+
+        javaProcess.on("error", (err) => {
+            jobs[jobId] = { status: "error", result: null, error: err.message };
+        });
+
+        javaProcess.unref();
+
+        await fs.mkdir(path.resolve(process.env.OUTPUT_PATH), { recursive: true });
+        
+        res.status(202).json({
+            "jobId": jobId
+        })
+    } catch (error) {
+        console.error(error)
+
+        res.status(500).json({
+            error: "Error starting job"
+        })
+    }
+}
+
+export const getJobStatus = (req, res) => {
+    try {
+        const job = jobs[req.params.jobId]
+
+        if (!job) {
+            return res.status(404).json({
+                error: "Job ID not found"
+            })
+        }
+
+        if (job.status === "processing") {
+            return res.status(200).json({
+                status: "processing"
+            })
+        }
+
+        if (job.status === "done") {
+            return res.status(200).json({
+                status: "done",
+                result: job.result
+            })
+        }
+
+        if (job.status === "error") {
+            return res.status(200).json({
+                status: "error",
+                error: job.error
+            })
+        }
+    }
+    catch (error) {
+        console.error(error)
+
+        res.status(500).json({
+            error: "Error fetching job status"
+        })
+    }
+}
