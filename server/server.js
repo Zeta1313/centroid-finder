@@ -4,25 +4,6 @@ import app from './app.js'
 dotenv.config();
 const PORT = process.env.PORT;
 
-// app.get("/api/videos", async (req, res) => {
-//     try {
-//         const allowedExtensions = [".mp4", ".mov", ".webm"]
-//         const files = await fs.readdir(videosPath)
-
-//         const videoFiles = files.filter(file => {
-//             const extension = path.extname(file).toLowerCase()
-//             return allowedExtensions.includes(extension)
-//         })
-
-//         res.json(videoFiles)
-//     }
-//     catch {
-//         res.status(500).json({
-//             error: "Error reading video directory"
-//         })
-//     }
-// })
-
 app.get("/thumbnail/:filename", async (req, res) => {
     try {
         const filename = req.params.filename
