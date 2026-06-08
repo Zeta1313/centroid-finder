@@ -19,3 +19,11 @@ Important files:
 ## DistanceImageBinarizer
 - first method takes in BurredImage type variable and converts into a 2d array that we return.
     - each entry is the returned array is either 0 or 1, representing a black or white pizel.
+
+
+# hi
+- javac -cp "lib/*;target" -d target src/*.java
+- find src -name "*.class" -delete && echo "Cleaned .class files" || echo "No .class files found or error"
+
+- mvn clean package -DskipTests
+java -jar target/videoprocessor.jar video.mp4 output.csv FFA200 164
