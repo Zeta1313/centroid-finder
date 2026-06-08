@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.awt.image.BufferedImage;
 
-public class CentroidTesting {
+public class CentroidFinderTest {
 
     @Test
     void testNullImageThrowsException() {
@@ -312,5 +312,59 @@ public class CentroidTesting {
         for (Group g : result) {
             assertEquals(1, g.size());
         }
+    }
+    
+    @Test
+    void findLargest() {
+        Group small = new Group(5, new Coordinate(0, 0));
+        Group medium = new Group(10, new Coordinate(1, 1));
+        Group large = new Group(20, new Coordinate(2, 2));
+
+        Group result = GroupManager.findLargestGroup(List.of(small, medium, large));
+
+        assertEquals(large, result);
+    }
+
+    @Test
+    void findLargestTie() {
+        Group first = new Group(10, new Coordinate(0, 0));
+        Group second = new Group(10, new Coordinate(5, 5));
+
+        Group result = GroupManager.findLargestGroup(List.of(first, second));
+
+        assertEquals(first, result);
+    }
+
+
+    @Test
+    void CalculatesCorrectDistance() {
+        Group a = new Group(1, new Coordinate(0, 0));
+        Group b = new Group(1, new Coordinate(3, 4));
+
+        double result = GroupManager.centroidDistance(a, b);
+
+        assertEquals(5.0, result, 0.0001);
+    }
+
+    @Test
+    void NearestGroup() {
+        Group previous = new Group(1, new Coordinate(0, 0));
+
+        Group far = new Group(1, new Coordinate(10, 10));
+        Group close = new Group(1, new Coordinate(1, 1));
+
+        Group result = GroupManager.findClosestGroup(previous, List.of(far, close));
+
+        assertEquals(close, result);
+    }
+
+    @Test
+    void DuplicateDistance() {
+        Group a = new Group(5, new Coordinate(7, 9));
+        Group b = new Group(10, new Coordinate(7, 9));
+
+        double result = GroupManager.centroidDistance(a, b);
+
+        assertEquals(0.0, result, 0.0001);
     }
 }
