@@ -20,6 +20,12 @@ public class VideoSummaryApp {
                 System.err.println("Threshold must be an integer.");
                 return;
             }
+
+            if (threshold < 0 || threshold > 441) {
+                System.err.println("Threshold must be within valid RGB range");
+                return; 
+            }
+
         int targetColor = 0;
         
         try {
