@@ -163,7 +163,7 @@ const PORT = process.env.PORT;
 // node server.js or npm run dev (make sure to install nodemon)
 //http://localhost:3000/api/videos
 //http://localhost:3000/thumbnail/video.mp4
-//http://localhost:3000/videos/video.mp4.
+//http://localhost:3000/videos/video.mp4
 //http://localhost:3000/process/video.mp4?targetColor=FFA200&threshold=164
 //http://localhost:3000/process/d?targetColor=FFA200&threshold=164
 
