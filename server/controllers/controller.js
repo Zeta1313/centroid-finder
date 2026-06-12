@@ -97,6 +97,8 @@ export const processFile = async (req, res) => {
             `${jobId}.csv`
         );
 
+        await fs.mkdir(path.resolve(process.env.OUTPUT_PATH), { recursive: true });
+
         const javaProcess = spawn("java", [
             "-jar", path.resolve(dirname, process.env.JAR_PATH),
             inputPath, outputPath, targetColor, threshold
@@ -113,8 +115,6 @@ export const processFile = async (req, res) => {
         });
 
         javaProcess.unref();
-
-        await fs.mkdir(path.resolve(process.env.OUTPUT_PATH), { recursive: true });
         
         res.status(202).json({
             "jobId": jobId

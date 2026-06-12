@@ -11,10 +11,12 @@ public class CSVExport implements AutoCloseable {
         writer = new PrintWriter(path);
 
         writer.println("frame,size,x,y");
+        // writer.flush();
     }
 
     public void writeFrame(int timestamp, Group group) {
         writer.println(timestamp + "," + group.toCsvRow());
+        // writer.flush();
     }
 
     @Override
