@@ -12,6 +12,8 @@ import crypto from 'crypto'
 dotenv.config()
 const videosPath = path.resolve(process.env.VIDEOS_PATH)
 const jobs = {}
+// tracks which videos currently have a running java process: filename -> jobId
+const activeVideos = new Map()
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -88,6 +90,14 @@ export const processFile = async (req, res) => {
         // console.log(safeFilename) // ex: print video.mp4
         // console.log(inputPath)    // ex: ...centroid-finder/videos/video.mp4
 
+        // only allow one running java process per video
+        if (activeVideos.has(safeFilename)) {
+            return res.status(409).json({
+                error: "This video is already being processed.",
+                jobId: activeVideos.get(safeFilename)
+            });
+        }
+
         const jobId = crypto.randomUUID();
         //updates or adds the jobID and its statuses report, this is for the /job/:jobID
         jobs[jobId] = { status: "processing", result: null, error: null };
@@ -99,18 +109,22 @@ export const processFile = async (req, res) => {
 
         await fs.mkdir(path.resolve(process.env.OUTPUT_PATH), { recursive: true });
 
+        activeVideos.set(safeFilename, jobId);
+
         const javaProcess = spawn("java", [
             "-jar", path.resolve(dirname, process.env.JAR_PATH),
             inputPath, outputPath, targetColor, threshold
         ], { detached: true, stdio: "ignore" });
 
         javaProcess.on("close", (code) => {
+            activeVideos.delete(safeFilename);
             jobs[jobId] = code === 0
                 ? { status: "done", result: `/results/${jobId}.csv`, error: null }
                 : { status: "error", result: null, error: `Process exited with code ${code}` };
         });
 
         javaProcess.on("error", (err) => {
+            activeVideos.delete(safeFilename);
             jobs[jobId] = { status: "error", result: null, error: err.message };
         });
 
