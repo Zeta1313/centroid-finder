@@ -11,6 +11,7 @@ import crypto from 'crypto'
 
 dotenv.config()
 const videosPath = path.resolve(process.env.VIDEOS_PATH)
+const jobLogPath = path.join(path.resolve(process.env.LOG_PATH), "job-logs.json")
 const jobs = {}
 // tracks which videos currently have a running java process: filename -> jobId
 const activeVideos = new Map()
@@ -101,6 +102,18 @@ export const processFile = async (req, res) => {
         const jobId = crypto.randomUUID();
         //updates or adds the jobID and its statuses report, this is for the /job/:jobID
         jobs[jobId] = { status: "processing", result: null, error: null };
+        const logs = await readJobLogs()
+        logs.push({
+            jobId,
+            filename: safeFilename,
+            targetColor,
+            threshold,
+            submittedAt: new Date().toISOString(),
+            status: "processing",
+            result: null,
+            error: null
+        })
+        await writeJobLogs(logs)
 
         const outputPath = path.join(
             path.resolve(process.env.OUTPUT_PATH),
@@ -116,17 +129,34 @@ export const processFile = async (req, res) => {
             inputPath, outputPath, targetColor, threshold
         ], { detached: true, stdio: "ignore" });
 
-        javaProcess.on("close", (code) => {
+        javaProcess.on("close", async (code) => {
             activeVideos.delete(safeFilename);
-            jobs[jobId] = code === 0
+            const update = code === 0
                 ? { status: "done", result: `/results/${jobId}.csv`, error: null }
                 : { status: "error", result: null, error: `Process exited with code ${code}` };
+            jobs[jobId] = update
+            const logs = await readJobLogs()
+            const log = logs.find(l => l.jobId === jobId)
+            if (log) {
+                Object.assign(log, update, {
+                    completedAt: new Date().toISOString()
+                })
+                await writeJobLogs(logs)
+            }
         });
 
-        javaProcess.on("error", (err) => {
-            activeVideos.delete(safeFilename);
-            jobs[jobId] = { status: "error", result: null, error: err.message };
-        });
+        javaProcess.on("error", async (err) => {
+            activeVideos.delete(safeFilename)
+            jobs[jobId] = {status: "error", result: null, error: err.message}
+            const logs = await readJobLogs()
+            const log = logs.find(l => l.jobId === jobId)
+            if (log) {
+                log.status = "error"
+                log.error = err.message
+                log.completedAt = new Date().toISOString()
+                await writeJobLogs(logs)
+            }
+        })  
 
         javaProcess.unref();
         
@@ -177,6 +207,33 @@ export const getJobStatus = (req, res) => {
 
         res.status(500).json({
             error: "Error fetching job status"
+        })
+    }
+}
+
+const readJobLogs = async () => {
+    try {
+        const data = await fs.readFile(jobLogPath, "utf8")
+        return JSON.parse(data)
+    }
+    catch {
+        return []
+    }
+}
+
+const writeJobLogs = async (logs) => {
+    await fs.mkdir(path.dirname(jobLogPath), { recursive: true })
+    await fs.writeFile(jobLogPath, JSON.stringify(logs, null, 2))
+}
+
+export const getJobLogs = async (req, res) => {
+    try {
+        const logs = await readJobLogs()
+        res.json(logs)
+    }
+    catch {
+        res.status(500).json({
+            error: "Error reading job logs"
         })
     }
 }
