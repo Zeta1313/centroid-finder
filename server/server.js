@@ -166,6 +166,7 @@ const PORT = process.env.PORT;
 //http://localhost:3000/videos/video.mp4
 //http://localhost:3000/process/video.mp4?targetColor=FFA200&threshold=164
 //http://localhost:3000/process/d?targetColor=FFA200&threshold=164
+//http://localhost:3000/job-logs
 
 //your env ex: 
 /*
