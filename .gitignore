@@ -32,3 +32,4 @@ node_modules
 /output
 processor/target
 processor/target/surefire-reports
+/log
