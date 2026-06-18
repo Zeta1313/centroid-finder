@@ -30,3 +30,5 @@ node_modules
 
 .env
 /output
+processor/target
+processor/target/surefire-reports
