@@ -1,0 +1,90 @@
+[
+  {
+    "jobId": "12c931e2-c810-4a02-a4ff-37ede736a267",
+    "filename": "video.mp4",
+    "targetColor": "ffffff",
+    "threshold": "0",
+    "submittedAt": "2026-06-17T22:19:40.760Z",
+    "status": "error",
+    "result": null,
+    "error": "Process exited with code 1",
+    "completedAt": "2026-06-17T22:19:40.786Z"
+  },
+  {
+    "jobId": "9e900f92-b4ce-4cf7-93ce-ba2a64717497",
+    "filename": "video.mp4",
+    "targetColor": "ffffff",
+    "threshold": "0",
+    "submittedAt": "2026-06-17T22:21:54.394Z",
+    "status": "error",
+    "result": null,
+    "error": "Process exited with code 1",
+    "completedAt": "2026-06-17T22:21:54.420Z"
+  },
+  {
+    "jobId": "d96108cd-f43a-4693-b17b-c32708a87c26",
+    "filename": "video.mp4",
+    "targetColor": "ffffff",
+    "threshold": "0",
+    "submittedAt": "2026-06-17T22:21:56.614Z",
+    "status": "error",
+    "result": null,
+    "error": "Process exited with code 1",
+    "completedAt": "2026-06-17T22:21:56.640Z"
+  },
+  {
+    "jobId": "abfb6a8a-2d4b-4b68-aa66-38072b8f375b",
+    "filename": "video.mp4",
+    "targetColor": "ffffff",
+    "threshold": "0",
+    "submittedAt": "2026-06-17T22:22:13.616Z",
+    "status": "error",
+    "result": null,
+    "error": "Process exited with code 1",
+    "completedAt": "2026-06-17T22:22:13.638Z"
+  },
+  {
+    "jobId": "f54cffb3-5121-43e7-832f-aac818d50b83",
+    "filename": "video.mp4",
+    "targetColor": "ffffff",
+    "threshold": "0",
+    "submittedAt": "2026-06-17T22:23:03.309Z",
+    "status": "error",
+    "result": null,
+    "error": "Process exited with code 1",
+    "completedAt": "2026-06-17T22:23:03.335Z"
+  },
+  {
+    "jobId": "dcb61c2c-717f-403d-a19d-f9271dacf567",
+    "filename": "video.mp4",
+    "targetColor": "ffffff",
+    "threshold": "0",
+    "submittedAt": "2026-06-17T22:23:21.841Z",
+    "status": "error",
+    "result": null,
+    "error": "Process exited with code 1",
+    "completedAt": "2026-06-17T22:23:21.862Z"
+  },
+  {
+    "jobId": "73d0db73-1c2f-44ee-8047-b8198f5ee75b",
+    "filename": "video.mp4",
+    "targetColor": "580004",
+    "threshold": "19",
+    "submittedAt": "2026-06-17T22:23:35.995Z",
+    "status": "error",
+    "result": null,
+    "error": "Process exited with code 1",
+    "completedAt": "2026-06-17T22:23:36.020Z"
+  },
+  {
+    "jobId": "3cd3139c-2dcd-47a0-b516-ddc97b8795ba",
+    "filename": "video.mp4",
+    "targetColor": "540002",
+    "threshold": "43",
+    "submittedAt": "2026-06-17T22:40:53.134Z",
+    "status": "error",
+    "result": null,
+    "error": "Process exited with code 1",
+    "completedAt": "2026-06-17T22:40:53.167Z"
+  }
+]

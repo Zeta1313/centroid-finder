@@ -5,7 +5,7 @@ Easy
 3. [DONE] Added Security: prevent multiple jobs from running on the same video. (one process per video) 
 Doable
 1. Toggleable interface that shows current progress of job, either through bar or text
-2. Log reachable from navbar that displays all jobs requested with timestamps and error recording
+2. [DONE] Log reachable from navbar that displays all jobs requested with timestamps and error recording 
 Stretch
 1. Reading the CSV files and turning that data into visual forms for the user
 2. Detecting multiple colors simultaneously for multicolored specimins 
